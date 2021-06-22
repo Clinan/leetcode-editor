@@ -100,6 +100,7 @@ public class CodeManager {
                         question.setLangSlug(object.getString("langSlug"));
                         StringBuffer sb = new StringBuffer();
                         sb.append(codeTypeEnum.getComment()).append(Constant.SUBMIT_REGION_BEGIN).append("\n");
+                        // TODO
                         sb.append(object.getString("code").replaceAll("\\n", "\n")).append("\n");
                         sb.append(codeTypeEnum.getComment()).append(Constant.SUBMIT_REGION_END).append("\n");
                         question.setCode(sb.toString());
