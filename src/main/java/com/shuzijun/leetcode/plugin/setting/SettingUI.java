@@ -56,6 +56,7 @@ public class SettingUI {
     private JPanel codeTemplate;
     private JPanel templateConstant;
     private JCheckBox jcefCheckBox;
+    private JCheckBox mdQuestionBox;
 
 
     private Editor fileNameEditor = null;
@@ -251,6 +252,7 @@ public class SettingUI {
         config.setFormatLevelColour(easyLabel.getForeground(), mediumLabel.getForeground(), hardLabel.getForeground());
         config.setEnglishContent(englishContentBox.isSelected());
         config.setJcef(jcefCheckBox.isSelected());
+        config.setMdFileContent(mdQuestionBox.isSelected());
     }
 
 

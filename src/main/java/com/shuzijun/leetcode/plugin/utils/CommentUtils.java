@@ -39,6 +39,10 @@ public class CommentUtils {
         return sb.toString();
     }
 
+    public static String createComment(String html) {
+        return html.replaceAll(" ", " ");
+    }
+
     public static String createSubmissions(String html) {
         String pageData = StringUtils.substringBetween(html, "var pageData =", "if (isNaN(pageData.submissionData.status_code))");
         if (StringUtils.isBlank(pageData)) {

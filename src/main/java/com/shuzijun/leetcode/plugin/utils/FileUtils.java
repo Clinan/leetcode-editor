@@ -7,6 +7,7 @@ import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
+import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -18,13 +19,16 @@ import com.shuzijun.leetcode.plugin.model.Constant;
 import com.shuzijun.leetcode.plugin.model.LeetcodeEditor;
 import com.shuzijun.leetcode.plugin.model.Question;
 import com.shuzijun.leetcode.plugin.setting.ProjectConfig;
-import org.apache.commons.lang.StringUtils;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author shuzijun
@@ -82,18 +86,19 @@ public class FileUtils {
                 ThrowableComputable<Boolean, Throwable> action = new ThrowableComputable<Boolean, Throwable>() {
                     @Override
                     public Boolean compute() throws Throwable {
-                        FileDocumentManager.getInstance().saveDocument(FileDocumentManager.getInstance().getDocument(vf));
+                        FileDocumentManager.getInstance()
+                                .saveDocument(FileDocumentManager.getInstance().getDocument(vf));
                         return true;
                     }
                 };
-
 
                 Application application = ApplicationManager.getApplication();
                 if (application.isDispatchThread()) {
                     ApplicationManager.getApplication().runWriteAction(action);
                 } else {
                     if (application.isReadAccessAllowed()) {
-                        LogUtils.LOG.error("Must not start write action from within read action in the other thread - deadlock is coming");
+                        LogUtils.LOG
+                                .error("Must not start write action from within read action in the other thread - deadlock is coming");
                     }
 
                     AtomicReference<Boolean> result = new AtomicReference();
@@ -130,9 +135,11 @@ public class FileUtils {
 
                 String[] lines = body.split("\r\n|\r|\n");
                 for (String line : lines) {
-                    if (StringUtils.isNotBlank(line) && trim(line).equals(trim(codeTypeEnum.getComment() + Constant.SUBMIT_REGION_BEGIN))) {
+                    if (StringUtils.isNotBlank(line) && trim(line)
+                            .equals(trim(codeTypeEnum.getComment() + Constant.SUBMIT_REGION_BEGIN))) {
                         codeBegins.add(lineCount);
-                    } else if (StringUtils.isNotBlank(line) && trim(line).equals(trim(codeTypeEnum.getComment() + Constant.SUBMIT_REGION_END))) {
+                    } else if (StringUtils.isNotBlank(line) && trim(line)
+                            .equals(trim(codeTypeEnum.getComment() + Constant.SUBMIT_REGION_END))) {
                         codeEnds.add(lineCount);
                     }
                     codeList.add(line);
@@ -260,6 +267,18 @@ public class FileUtils {
             VirtualFile vf = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
             OpenFileDescriptor descriptor = new OpenFileDescriptor(project, vf);
             FileEditorManager.getInstance(project).openTextEditor(descriptor, false);
+            FileEditorManagerEx.getInstanceEx(project).getSplitters();
+        });
+    }
+
+    public static void openFileEditorAndOpenSplit(File file, Project project) {
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            VirtualFile vf = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
+            OpenFileDescriptor descriptor = new OpenFileDescriptor(project, vf);
+            FileEditorManager.getInstance(project).openTextEditor(descriptor, false);
+            FileEditorManagerEx instanceEx = FileEditorManagerEx.getInstanceEx(project);
+            instanceEx.unsplitAllWindow();
+            instanceEx.createSplitter(1, instanceEx.getCurrentWindow());
         });
     }
 

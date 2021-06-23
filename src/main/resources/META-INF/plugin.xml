@@ -1,13 +1,13 @@
 <idea-plugin>
-    <id>leetcode-editor</id>
-    <name>leetcode editor</name>
-    <version>6.9</version>
-    <vendor email="shuzijun0109@gmail.com" url="https://github.com/shuzijun/idea-leetcode-plugin">shuzijun</vendor>
+    <id>leetcode-editor-plus</id>
+    <name>leetcode editor plus</name>
+    <version>1.0</version>
+    <vendor email="artergo163@gmail.com" url="https://github.com/clinan/idea-leetcode">clinan</vendor>
 
     <description><![CDATA[
         <div>
            <p>Support for leetcode.com and leetcode-cn.com, can test and submit questions.
-			  More tutorial please visit： <a href="https://github.com/shuzijun/leetcode-editor">here</a></p>
+			  More tutorial please visit： <a href="https://github.com/clinan/leetcode-editor">here</a></p>
         </div>
         <div>
 			<h2>Introduction</h2>

@@ -34,14 +34,23 @@ public class CodeManager {
             return;
         }
 
-        String filePath = PersistentConfig.getInstance().getTempFilePath() + VelocityUtils.convert(config.getCustomFileName(), question) + codeTypeEnum.getSuffix();
+        String fn = PersistentConfig.getInstance().getTempFilePath() + VelocityUtils.convert(config.getCustomFileName(),
+                                                                                          question);
+        String filePath = fn + codeTypeEnum.getSuffix();
 
         File file = new File(filePath);
+
         if (file.exists()) {
             FileUtils.openFileEditorAndSaveState(file,project,question);
         } else {
-
             if (getQuestion(question, codeTypeEnum, project)) {
+                if(config.getMdFileContent()) {
+                    String mdFilePath = fn + ".md";
+                    File mdFile = new File(mdFilePath);
+                    FileUtils.saveFile(mdFile, CommentUtils.createComment(question.getContent()));
+                    FileUtils.openFileEditorAndOpenSplit(mdFile, project);
+                }
+
                 question.setContent(CommentUtils.createComment(question.getContent(), codeTypeEnum));
                 FileUtils.saveFile(file, VelocityUtils.convert(config.getCustomTemplate(), question));
                 FileUtils.openFileEditorAndSaveState(file,project,question);
@@ -83,10 +92,9 @@ public class CodeManager {
             httpRequest.setBody("{\"operationName\":\"questionData\",\"variables\":{\"titleSlug\":\"" + question.getTitleSlug() + "\"},\"query\":\"query questionData($titleSlug: String!) {\\n  question(titleSlug: $titleSlug) {\\n    questionId\\n    questionFrontendId\\n    boundTopicId\\n    title\\n    titleSlug\\n    content\\n    translatedTitle\\n    translatedContent\\n    isPaidOnly\\n    difficulty\\n    likes\\n    dislikes\\n    isLiked\\n    similarQuestions\\n    contributors {\\n      username\\n      profileUrl\\n      avatarUrl\\n      __typename\\n    }\\n    langToValidPlayground\\n    topicTags {\\n      name\\n      slug\\n      translatedName\\n      __typename\\n    }\\n    companyTagStats\\n    codeSnippets {\\n      lang\\n      langSlug\\n      code\\n      __typename\\n    }\\n    stats\\n    hints\\n    solution {\\n      id\\n      canSeeDetail\\n      __typename\\n    }\\n    status\\n    sampleTestCase\\n    metaData\\n    judgerAvailable\\n    judgeType\\n    mysqlSchemas\\n    enableRunCode\\n    enableTestMode\\n    envInfo\\n    __typename\\n  }\\n}\\n\"}");
             httpRequest.addHeader("Accept", "application/json");
             HttpResponse response = HttpRequestUtils.executePost(httpRequest);
-            if (response != null && response.getStatusCode() == 200) {
+            if (response.getStatusCode() == 200) {
 
                 String body = response.getBody();
-
                 JSONObject jsonObject = JSONObject.parseObject(body).getJSONObject("data").getJSONObject("question");
 
                 question.setContent(getContent(jsonObject));
@@ -292,23 +300,7 @@ public class CodeManager {
     private static String getContent(JSONObject jsonObject) {
         StringBuffer sb = new StringBuffer();
         sb.append(jsonObject.getString(URLUtils.getDescContent()));
-        JSONArray topicTagsArray = jsonObject.getJSONArray("topicTags");
-        if (topicTagsArray != null && !topicTagsArray.isEmpty()) {
-            sb.append("<div><div>Related Topics</div><div>");
-            for (int i = 0; i < topicTagsArray.size(); i++) {
-                JSONObject tag = topicTagsArray.getJSONObject(i);
-                sb.append("<li>");
-                if (StringUtils.isBlank(tag.getString("translatedName"))) {
-                    sb.append(tag.getString("name"));
-                } else {
-                    sb.append(tag.getString("translatedName"));
-                }
-                sb.append("</li>");
-            }
-            sb.append("</div></div>");
-            sb.append("\\n");
-        }
-        sb.append("<div><li>\uD83D\uDC4D "+jsonObject.getInteger("likes")+"</li><li>\uD83D\uDC4E "+jsonObject.getInteger("dislikes")+"</li></div>");
+//        sb.append("<div><li>\uD83D\uDC4D "+jsonObject.getInteger("likes")+"</li><li>\uD83D\uDC4E "+jsonObject.getInteger("dislikes")+"</li></div>");
         return sb.toString();
     }
 

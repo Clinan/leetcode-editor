@@ -90,6 +90,11 @@ public class Config {
      */
     private Boolean jcef = false;
 
+    /**
+     * md文档题目
+     */
+    private Boolean mdFileContent = true;
+
     private List<String> favoriteList;
 
     public String getId() {
@@ -238,6 +243,7 @@ public class Config {
     public String getLevelColour() {
         return levelColour;
     }
+
     @Transient
     public Color[] getFormatLevelColour() {
         Color[] formatColors = new Color[3];
@@ -267,9 +273,9 @@ public class Config {
     }
 
     public void setLevelColour(String levelColour) {
-        if(levelColour ==null || levelColour.isEmpty()){
+        if (levelColour == null || levelColour.isEmpty()) {
             this.levelColour = Constant.LEVEL_COLOUR;
-        }else {
+        } else {
             this.levelColour = levelColour;
         }
     }
@@ -308,26 +314,57 @@ public class Config {
         this.jcef = jcef;
     }
 
-    public boolean isModified(Config config){
-        if(config ==null){
+    public void setMdFileContent(Boolean mdFileContent) {
+        this.mdFileContent = mdFileContent;
+    }
+
+    public Boolean getMdFileContent() {
+        return mdFileContent;
+    }
+
+    public boolean isModified(Config config) {
+        if (config == null) {
             return false;
         }
-        if (version != null ? !version.equals(config.version) : config.version != null) return false;
-        if (loginName != null ? !loginName.equals(config.loginName) : config.loginName != null) return false;
-        if (filePath != null ? !filePath.equals(config.filePath) : config.filePath != null) return false;
-        if (codeType != null ? !codeType.equals(config.codeType) : config.codeType != null) return false;
-        if (url != null ? !url.equals(config.url) : config.url != null) return false;
-        if (update != null ? !update.equals(config.update) : config.update != null) return false;
-        if (proxy != null ? !proxy.equals(config.proxy) : config.proxy != null) return false;
-        if (customCode != null ? !customCode.equals(config.customCode) : config.customCode != null) return false;
-        if (englishContent != null ? !englishContent.equals(config.englishContent) : config.englishContent != null)
+        if (version != null ? !version.equals(config.version) : config.version != null) {
             return false;
-        if (customFileName != null ? !customFileName.equals(config.customFileName) : config.customFileName != null)
+        }
+        if (loginName != null ? !loginName.equals(config.loginName) : config.loginName != null) {
             return false;
-        if (customTemplate != null ? !customTemplate.equals(config.customTemplate) : config.customTemplate != null)
+        }
+        if (filePath != null ? !filePath.equals(config.filePath) : config.filePath != null) {
             return false;
-        if (jcef != null ? !jcef.equals(config.jcef) : config.jcef != null)
+        }
+        if (codeType != null ? !codeType.equals(config.codeType) : config.codeType != null) {
             return false;
+        }
+        if (url != null ? !url.equals(config.url) : config.url != null) {
+            return false;
+        }
+        if (update != null ? !update.equals(config.update) : config.update != null) {
+            return false;
+        }
+        if (proxy != null ? !proxy.equals(config.proxy) : config.proxy != null) {
+            return false;
+        }
+        if (customCode != null ? !customCode.equals(config.customCode) : config.customCode != null) {
+            return false;
+        }
+        if (englishContent != null ? !englishContent.equals(config.englishContent) : config.englishContent != null) {
+            return false;
+        }
+        if (customFileName != null ? !customFileName.equals(config.customFileName) : config.customFileName != null) {
+            return false;
+        }
+        if (customTemplate != null ? !customTemplate.equals(config.customTemplate) : config.customTemplate != null) {
+            return false;
+        }
+        if (jcef != null ? !jcef.equals(config.jcef) : config.jcef != null) {
+            return false;
+        }
+        if (mdFileContent != null ? !mdFileContent.equals(config.mdFileContent) : config.mdFileContent != null) {
+            return false;
+        }
         return levelColour != null ? levelColour.equals(config.levelColour) : config.levelColour == null;
     }
 
