@@ -47,7 +47,11 @@ public class CodeManager {
                 if(config.getMdFileContent()) {
                     String mdFilePath = fn + ".md";
                     File mdFile = new File(mdFilePath);
-                    FileUtils.saveFile(mdFile, CommentUtils.createComment(question.getContent()));
+                    String content = CommentUtils.createComment(question.getContent());
+                    // FIXME support leetcode.com
+                    content = String.format("# [%s](https://leetcode-cn.com/problems/%s)\n%s",
+                                            question.getTitle(), question.getTitleSlug(), content);
+                    FileUtils.saveFile(mdFile, content);
                     FileUtils.openFileEditorAndOpenSplit(mdFile, project);
                 }
 
