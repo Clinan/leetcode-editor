@@ -35,29 +35,32 @@ public class CodeManager {
         }
 
         String fn = PersistentConfig.getInstance().getTempFilePath() + VelocityUtils.convert(config.getCustomFileName(),
-                                                                                          question);
+                question);
         String filePath = fn + codeTypeEnum.getSuffix();
 
         File file = new File(filePath);
-
+        String mdFilePath = fn + ".md";
+        File mdFile = new File(mdFilePath);
+        if (mdFile.exists()) {
+            FileUtils.openFileEditorAndOpenSplit(mdFile, project);
+        }
         if (file.exists()) {
-            FileUtils.openFileEditorAndSaveState(file,project,question);
+            FileUtils.openFileEditorAndSaveState(file, project, question);
         } else {
             if (getQuestion(question, codeTypeEnum, project)) {
-                if(config.getMdFileContent()) {
-                    String mdFilePath = fn + ".md";
-                    File mdFile = new File(mdFilePath);
+                if (config.getMdFileContent()) {
+
                     String content = CommentUtils.createComment(question.getContent());
                     // FIXME support leetcode.com
                     content = String.format("# [%s](https://leetcode-cn.com/problems/%s)\n%s",
-                                            question.getTitle(), question.getTitleSlug(), content);
+                            question.getTitle(), question.getTitleSlug(), content);
                     FileUtils.saveFile(mdFile, content);
                     FileUtils.openFileEditorAndOpenSplit(mdFile, project);
                 }
 
                 question.setContent(CommentUtils.createComment(question.getContent(), codeTypeEnum));
                 FileUtils.saveFile(file, VelocityUtils.convert(config.getCustomTemplate(), question));
-                FileUtils.openFileEditorAndSaveState(file,project,question);
+                FileUtils.openFileEditorAndSaveState(file, project, question);
             }
         }
     }
@@ -80,11 +83,11 @@ public class CodeManager {
 
         File file = new File(filePath);
         if (file.exists()) {
-            FileUtils.openFileEditor(file,project);
+            FileUtils.openFileEditor(file, project);
         } else {
             if (getQuestion(question, codeTypeEnum, project)) {
                 FileUtils.saveFile(file, question.getContent());
-                FileUtils.openFileEditor(file,project);
+                FileUtils.openFileEditor(file, project);
             }
 
         }
@@ -92,7 +95,7 @@ public class CodeManager {
 
     private static boolean getQuestion(Question question, CodeTypeEnum codeTypeEnum, Project project) {
         try {
-            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeGraphql(),"application/json");
+            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeGraphql(), "application/json");
             httpRequest.setBody("{\"operationName\":\"questionData\",\"variables\":{\"titleSlug\":\"" + question.getTitleSlug() + "\"},\"query\":\"query questionData($titleSlug: String!) {\\n  question(titleSlug: $titleSlug) {\\n    questionId\\n    questionFrontendId\\n    boundTopicId\\n    title\\n    titleSlug\\n    content\\n    translatedTitle\\n    translatedContent\\n    isPaidOnly\\n    difficulty\\n    likes\\n    dislikes\\n    isLiked\\n    similarQuestions\\n    contributors {\\n      username\\n      profileUrl\\n      avatarUrl\\n      __typename\\n    }\\n    langToValidPlayground\\n    topicTags {\\n      name\\n      slug\\n      translatedName\\n      __typename\\n    }\\n    companyTagStats\\n    codeSnippets {\\n      lang\\n      langSlug\\n      code\\n      __typename\\n    }\\n    stats\\n    hints\\n    solution {\\n      id\\n      canSeeDetail\\n      __typename\\n    }\\n    status\\n    sampleTestCase\\n    metaData\\n    judgerAvailable\\n    judgeType\\n    mysqlSchemas\\n    enableRunCode\\n    enableTestMode\\n    envInfo\\n    __typename\\n  }\\n}\\n\"}");
             httpRequest.addHeader("Accept", "application/json");
             HttpResponse response = HttpRequestUtils.executePost(httpRequest);
@@ -148,7 +151,7 @@ public class CodeManager {
         }
 
         try {
-            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeProblems() + question.getTitleSlug() + "/submit/","application/json");
+            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeProblems() + question.getTitleSlug() + "/submit/", "application/json");
             JSONObject arg = new JSONObject();
             arg.put("question_id", question.getQuestionId());
             arg.put("lang", question.getLangSlug());
@@ -190,7 +193,7 @@ public class CodeManager {
         }
 
         try {
-            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeProblems() + question.getTitleSlug() + "/interpret_solution/","application/json");
+            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeProblems() + question.getTitleSlug() + "/interpret_solution/", "application/json");
             JSONObject arg = new JSONObject();
             arg.put("question_id", question.getQuestionId());
             arg.put("data_input", question.getTestCase());
@@ -256,7 +259,7 @@ public class CodeManager {
         }
 
         try {
-            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeGraphql(),"application/json");
+            HttpRequest httpRequest = HttpRequest.post(URLUtils.getLeetcodeGraphql(), "application/json");
             httpRequest.setBody("{\"operationName\":\"questionData\",\"variables\":{\"titleSlug\":\"" + question.getTitleSlug() + "\"},\"query\":\"query questionData($titleSlug: String!) {\\n  question(titleSlug: $titleSlug) {\\n    questionId\\n    questionFrontendId\\n    boundTopicId\\n    title\\n    titleSlug\\n    content\\n    translatedTitle\\n    translatedContent\\n    isPaidOnly\\n    difficulty\\n    likes\\n    dislikes\\n    isLiked\\n    similarQuestions\\n    contributors {\\n      username\\n      profileUrl\\n      avatarUrl\\n      __typename\\n    }\\n    langToValidPlayground\\n    topicTags {\\n      name\\n      slug\\n      translatedName\\n      __typename\\n    }\\n    companyTagStats\\n    codeSnippets {\\n      lang\\n      langSlug\\n      code\\n      __typename\\n    }\\n    stats\\n    hints\\n    solution {\\n      id\\n      canSeeDetail\\n      __typename\\n    }\\n    status\\n    sampleTestCase\\n    metaData\\n    judgerAvailable\\n    judgeType\\n    mysqlSchemas\\n    enableRunCode\\n    enableTestMode\\n    envInfo\\n    __typename\\n  }\\n}\\n\"}");
             httpRequest.addHeader("Accept", "application/json");
             HttpResponse response = HttpRequestUtils.executePost(httpRequest);
@@ -316,7 +319,7 @@ public class CodeManager {
         private Project project;
 
         public SubmitCheckTask(JSONObject returnObj, CodeTypeEnum codeTypeEnum, Question question, Project project) {
-            super(project,PluginConstant.PLUGIN_NAME + ".submitCheckTask",true);
+            super(project, PluginConstant.PLUGIN_NAME + ".submitCheckTask", true);
             this.returnObj = returnObj;
             this.codeTypeEnum = codeTypeEnum;
             this.question = question;
@@ -327,7 +330,7 @@ public class CodeManager {
         public void run(@NotNull ProgressIndicator progressIndicator) {
             String key = returnObj.getString("submission_id");
             for (int i = 0; i < 50; i++) {
-                if(progressIndicator.isCanceled()){
+                if (progressIndicator.isCanceled()) {
                     MessageUtils.getInstance(project).showWarnMsg("error", PropertiesUtils.getInfo("request.cancel"));
                     return;
                 }
@@ -363,7 +366,7 @@ public class CodeManager {
                                 }
                             } else {
                                 String outputs = jsonObject.getString("std_output");
-                                MessageUtils.getInstance(project).showInfoMsg("info", PropertiesUtils.getInfo("submit.run.failed", buildErrorMsg(jsonObject),jsonObject.getString("last_testcase"), outputs));
+                                MessageUtils.getInstance(project).showInfoMsg("info", PropertiesUtils.getInfo("submit.run.failed", buildErrorMsg(jsonObject), jsonObject.getString("last_testcase"), outputs));
                                 if (!"ac".equals(question.getStatus())) {
                                     question.setStatus("notac");
                                     ViewManager.updateStatus();
@@ -401,13 +404,13 @@ public class CodeManager {
     }
 
 
-    private static class RunCodeCheckTask extends Task.Backgroundable  {
+    private static class RunCodeCheckTask extends Task.Backgroundable {
         private JSONObject returnObj;
         private Project project;
         private String input;
 
         public RunCodeCheckTask(JSONObject returnObj, Project project, String input) {
-            super(project, PluginConstant.PLUGIN_NAME+".runCodeCheckTask",true);
+            super(project, PluginConstant.PLUGIN_NAME + ".runCodeCheckTask", true);
             this.returnObj = returnObj;
             this.project = project;
             this.input = input;
@@ -420,7 +423,7 @@ public class CodeManager {
                 key = returnObj.getString("interpret_id");
             }
             for (int i = 0; i < 50; i++) {
-                if(progressIndicator.isCanceled()){
+                if (progressIndicator.isCanceled()) {
                     MessageUtils.getInstance(project).showWarnMsg("error", PropertiesUtils.getInfo("request.cancel"));
                     return;
                 }
